@@ -4,8 +4,8 @@ from flask import Flask, request
 from flask_cors import CORS, cross_origin
 
 from stcp.api import get_lines, get_line_directions, get_line_stops, get_stop_real_times
+from stcp.util import stop_departures
 from src.stops import write_stops_file, read_stops_file, get_static_stop_data
-
 
 app = Flask(__name__)
 CORS(app, support_credentials=True)
@@ -54,19 +54,9 @@ def get_stop(stop_code: str):
     stop_data = get_static_stop_data(stop_code)
 
     if not static_only:
-        timetable = get_stop_real_times(stop_code, use_hash_cache=False)
-
-        # append next buses to each line of the stop
-        # create a map of all the lines and their departures
-        line_departures = {}
-        for bus in timetable:
-            line_code = bus['line_code']
-            if line_code not in line_departures:
-                line_departures[line_code] = []
-
-            line_departures[line_code].append(bus['time'])
-
         # append the departures to their respective line
+        line_departures = stop_departures(stop_code, False)
+
         for line in stop_data['lines']:
             line_code = line['line_code']
             line['next'] = line_departures[line_code] if line_code in line_departures else []

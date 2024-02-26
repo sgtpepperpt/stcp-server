@@ -1,2 +1,2 @@
 Flask~=3.0.2
-stcp_api~=1.1.0
+stcp_api~=1.1.1
